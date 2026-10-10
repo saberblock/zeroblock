@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ZERO BLOCK — «Конторка»</title>
+    <meta name="description" content="ZERO BLOCK — инди-студия. Делаем «Конторку»: открытый мир в постсоветском городке начала 2000-х. Туман, дождь, бар «Старый храм» и одна контора, которая решает всё.">
+    <meta property="og:title" content="ZERO BLOCK — «Конторка»">
+    <meta property="og:description" content="Открытый мир. Постсоветский городок начала 2000-х. Одна контора, которая решает всё.">
+    <meta property="og:image" content="https://saberblock.github.io/zeroblock/img/bar_square.jpg">
+    <meta property="og:type" content="website">
+    <meta name="theme-color" content="#0a0a0a">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;600&family=PT+Sans:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0a0a0a;
+            --panel: #0f0f0f;
+            --line: #1c1c1c;
+            --text: #e0e0e0;
+            --muted: #9a9a9a;
+            --dim: #5a5a5a;
+            --white: #ffffff;
+            --neon: #e0312f;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { scroll-behavior: smooth; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: "PT Sans", Arial, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        /* ---------- туман и зерно ---------- */
+        .fog, .grain {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: 0;
+        }
+        .fog::before, .fog::after {
+            content: "";
+            position: absolute;
+            inset: -20%;
+            background:
+                radial-gradient(ellipse 60% 25% at 30% 70%, rgba(200,200,200,0.06), transparent 70%),
+                radial-gradient(ellipse 50% 20% at 75% 40%, rgba(200,200,200,0.05), transparent 70%),
+                radial-gradient(ellipse 70% 30% at 50% 95%, rgba(200,200,200,0.07), transparent 70%);
+            animation: drift 40s linear infinite alternate;
+        }
+        .fog::after {
+            animation-duration: 65s;
+            animation-direction: alternate-reverse;
+            opacity: 0.8;
+        }
+        @keyframes drift {
+            from { transform: translateX(-6%) translateY(0); }
+            to   { transform: translateX(6%) translateY(-3%); }
+        }
+        .grain {
+            opacity: 0.06;
+            background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+        }
+
+        /* ---------- шапка ---------- */
+        header {
+            background-color: rgba(13,13,13,0.92);
+            border-bottom: 1px solid var(--line);
+            padding: 18px 40px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 14px;
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            backdrop-filter: blur(6px);
+        }
+
+        .logo {
+            font-family: "Oswald", Arial, sans-serif;
+            font-size: 26px;
+            letter-spacing: 6px;
+            color: var(--white);
+            font-weight: 600;
+            text-decoration: none;
+            animation: logoGlow 3s infinite alternate;
+        }
+        @keyframes logoGlow {
+            from { text-shadow: 0 0 5px rgba(255,255,255,0.2); }
+            to   { text-shadow: 0 0 15px rgba(255,255,255,0.6); }
+        }
+
+        nav { display: flex; gap: 24px; flex-wrap: wrap; }
+
+        nav a {
+            color: var(--muted);
+            text-decoration: none;
+            font-family: "Oswald", Arial, sans-serif;
+            font-size: 15px;
+            letter-spacing: 1.5px;
+            transition: 0.3s;
+            padding-bottom: 3px;
+            border-bottom: 1px solid transparent;
+        }
+        nav a:hover, nav a.active {
+            color: var(--white);
+            text-shadow: 0 0 8px rgba(255,255,255,0.7);
+        }
+        nav a.active { border-bottom-color: #555; }
+
+        /* ---------- страницы ---------- */
+        main {
+            flex: 1;
+            padding: 70px 20px 80px;
+            position: relative;
+            z-index: 1;
+        }
+
+        .page {
+            display: none;
+            max-width: 820px;
+            margin: 0 auto;
+            line-height: 1.7;
+        }
+        .page.active {
+            display: block;
+            animation: appear 0.6s ease;
+        }
+        @keyframes appear {
+            from { opacity: 0; transform: translateY(12px); filter: blur(4px); }
+            to   { opacity: 1; transform: none; filter: none; }
+        }
+
+        h1, h2, h3 { font-family: "Oswald", Arial, sans-serif; font-weight: 600; color: var(--white); }
+
+        .page h1 {
+            font-size: clamp(40px, 9vw, 72px);
+            letter-spacing: 10px;
+            text-shadow: 0 0 14px rgba(255,255,255,0.45);
+            line-height: 1.1;
+        }
+        .page h2 {
+            font-size: 28px;
+            letter-spacing: 3px;
+            margin-bottom: 22px;
+            text-shadow: 0 0 8px rgba(255,255,255,0.35);
+            text-align: center;
+        }
+        .page h3 {
+            font-size: 19px;
+            letter-spacing: 1.5px;
+            margin: 34px 0 10px;
+        }
+        .page p { color: #b4b4b4; font-size: 17px; margin: 10px 0; }
+        .page strong { color: var(--white); }
+        .center { text-align: center; }
+
+        /* главная */
+        .hero { text-align: center; padding-top: 10px; }
+        .hero .tagline { font-size: 19px; color: var(--muted); letter-spacing: 2px; margin-top: 8px; }
+        .hero-shot {
+            margin: 46px auto 0;
+            border: 1px solid #222;
+            position: relative;
+            overflow: hidden;
+        }
+        .hero-shot img { display: block; width: 100%; height: auto; filter: grayscale(0.25) contrast(1.05); }
+        .hero-shot::after {
+            content: "";
+            position: absolute; inset: 0;
+            background: linear-gradient(180deg, transparent 55%, rgba(10,10,10,0.95));
+        }
+        .hero-caption {
+            position: absolute; left: 0; right: 0; bottom: 18px; z-index: 2;
+            text-align: center;
+        }
+        .game-title {
+            font-family: "Oswald", Arial, sans-serif;
+            font-size: clamp(30px, 6vw, 46px);
+            letter-spacing: 8px;
+            color: var(--white);
+        }
+        .game-title .neon {
+            color: var(--neon);
+            text-shadow: 0 0 6px rgba(224,49,47,0.9), 0 0 18px rgba(224,49,47,0.6);
+            animation: flicker 6s infinite;
+        }
+        @keyframes flicker {
+            0%, 18%, 22%, 62%, 64%, 100% { opacity: 1; }
+            20%, 63% { opacity: 0.35; }
+        }
+        .page .quote {
+            font-size: 20px;
+            color: #d0d0d0;
+            font-style: italic;
+            margin: 40px auto 0;
+            max-width: 620px;
+            text-align: center;
+        }
+        .page .quote span { display: block; font-style: normal; font-size: 14px; color: var(--dim); margin-top: 8px; letter-spacing: 1px; }
+
+        .btn {
+            display: inline-block;
+            background-color: #111;
+            color: var(--white);
+            border: 1px solid #333;
+            padding: 13px 28px;
+            font-family: "Oswald", Arial, sans-serif;
+            font-size: 16px;
+            letter-spacing: 1.5px;
+            text-decoration: none;
+            margin: 26px 8px 0;
+            transition: 0.3s;
+        }
+        .btn:hover {
+            background-color: #1f1f1f;
+            border-color: #777;
+            box-shadow: 0 0 15px rgba(255,255,255,0.2);
+            transform: scale(1.04);
+        }
+
+        /* факты об игре */
+        .facts {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1px;
+            background: var(--line);
+            border: 1px solid var(--line);
+            margin: 26px 0 10px;
+        }
+        .fact { background: var(--panel); padding: 16px 18px; }
+        .fact .k { font-size: 12px; letter-spacing: 2px; color: var(--dim); text-transform: uppercase; }
+        .fact .v { color: var(--white); font-size: 16px; margin-top: 4px; }
+
+        .steps { list-style: none; counter-reset: s; margin: 10px 0; }
+        .steps li {
+            counter-increment: s;
+            position: relative;
+            padding: 8px 0 8px 44px;
+            color: #b4b4b4;
+            font-size: 17px;
+            border-bottom: 1px solid #141414;
+        }
+        .steps li::before {
+            content: counter(s, decimal-leading-zero);
+            position: absolute; left: 0; top: 8px;
+            font-family: "Oswald", Arial, sans-serif;
+            color: var(--dim);
+            letter-spacing: 1px;
+        }
+
+        .note {
+            border-left: 2px solid var(--neon);
+            padding: 10px 16px;
+            background: #0f0b0b;
+            margin: 24px 0;
+        }
+        .note p { margin: 4px 0; }
+
+        /* дневник */
+        .log-entry { border-top: 1px solid var(--line); padding: 24px 0; }
+        .log-date { font-family: "Oswald", Arial, sans-serif; color: var(--dim); letter-spacing: 2px; font-size: 14px; }
+        .log-entry ul { margin: 8px 0 0 20px; color: #b4b4b4; font-size: 16px; }
+        .log-entry li { margin: 4px 0; }
+
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 10px;
+            margin-top: 18px;
+        }
+        .gallery figure { margin: 0; border: 1px solid #1f1f1f; background: var(--panel); cursor: zoom-in; }
+        .gallery img { display: block; width: 100%; height: auto; transition: 0.4s; filter: grayscale(0.2); }
+        .gallery figure:hover img { filter: none; }
+        .gallery figcaption { font-size: 13px; color: var(--dim); padding: 8px 10px; letter-spacing: 0.5px; }
+
+        /* вакансии */
+        .jobs { display: grid; gap: 10px; margin-top: 10px; }
+        .job {
+            border: 1px solid var(--line);
+            background: var(--panel);
+            padding: 16px 20px;
+            transition: 0.3s;
+        }
+        .job:hover { border-color: #444; transform: translateX(4px); }
+        .job h3 { margin: 0 0 4px; font-size: 18px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .job p { margin: 0; font-size: 15px; color: var(--muted); }
+        .tag {
+            font-family: "PT Sans", Arial, sans-serif;
+            font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+            color: var(--neon); border: 1px solid rgba(224,49,47,0.5); padding: 1px 7px;
+        }
+
+        /* просмотр картинок */
+        .lightbox {
+            position: fixed; inset: 0; z-index: 50;
+            background: rgba(0,0,0,0.92);
+            display: none; align-items: center; justify-content: center;
+            padding: 20px; cursor: zoom-out;
+        }
+        .lightbox.open { display: flex; }
+        .lightbox img { max-width: 100%; max-height: 90vh; border: 1px solid #333; }
+
+        footer {
+            text-align: center;
+            padding: 25px;
+            color: #4a4a4a;
+            font-size: 13px;
+            border-top: 1px solid #111;
+            position: relative;
+            z-index: 1;
+            letter-spacing: 0.5px;
+        }
+
+        @media (max-width: 640px) {
+            header { padding: 14px 16px; justify-content: center; }
+            nav { gap: 14px; justify-content: center; }
+            nav a { font-size: 14px; }
+            main { padding: 40px 16px 60px; }
+            .page p, .steps li { font-size: 16px; }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after { animation: none !important; transition: none !important; }
+        }
+    </style>
+</head>
+<body>
+    <div class="fog"></div>
+    <div class="grain"></div>
+
+    <header>
+        <a class="logo" href="#home" data-page="home">ZERO BLOCK</a>
+        <nav>
+            <a href="#home" data-page="home">ГЛАВНАЯ</a>
+            <a href="#game" data-page="game">ИГРА</a>
+            <a href="#devlog" data-page="devlog">ДНЕВНИК</a>
+            <a href="#about" data-page="about">О НАС</a>
+            <a href="#jobs" data-page="jobs">ВАКАНСИИ</a>
+            <a href="#contacts" data-page="contacts">КОНТАКТЫ</a>
+        </nav>
+    </header>
+
+    <main>
+        <!-- ГЛАВНАЯ -->
+        <section id="page-home" data-id="home" class="page active">
+            <div class="hero">
+                <h1>ZERO BLOCK</h1>
+                <p class="tagline">Мы делаем игры с нуля.</p>
+
+                <div class="hero-shot">
+                    <img src="img/bar_square.jpg" alt="Бар «Старый храм» на площади с фонтаном. Кадр из Unity, ранняя версия" width="1280" height="720">
+                    <div class="hero-caption">
+                        <div class="game-title">«КОНТОР<span class="neon">КА</span>»</div>
+                    </div>
+                </div>
+
+                <p class="quote">«Вот бы была одна конторка, которая решала бы всё…»<span>— с этой фразы всё и началось</span></p>
+
+                <a class="btn" href="#game" data-page="game">ОБ ИГРЕ</a>
+                <a class="btn" href="#devlog" data-page="devlog">ДНЕВНИК РАЗРАБОТКИ</a>
+            </div>
+        </section>
+
+        <!-- ИГРА -->
+        <section id="page-game" data-id="game" class="page">
+            <h2>«КОНТОРКА»</h2>
+            <p class="center">Открытый мир. Серый постсоветский городок. Начало 2000-х.<br>Туман, дождь, цинизм и чёрный юмор.</p>
+
+            <div class="facts">
+                <div class="fact"><div class="k">Жанр</div><div class="v">Открытый мир, экшен, квесты, RPG-элементы</div></div>
+                <div class="fact"><div class="k">Вид</div><div class="v">От третьего лица</div></div>
+                <div class="fact"><div class="k">Сеттинг</div><div class="v">ПГТ, начало 2000-х</div></div>
+                <div class="fact"><div class="k">Вдохновение</div><div class="v">GTA: San Andreas + Silent Hill</div></div>
+            </div>
+
+            <h3>ЗАВЯЗКА</h3>
+            <ol class="steps">
+                <li>Безработный герой сидит на картонке у бара «Старый храм».</li>
+                <li>Из бара вываливается женщина — кричит про зарплату, кредиты и закон, выливает помои и бросает: <strong>«Вот бы была одна конторка, которая решала бы всё»</strong>.</li>
+                <li>Герой слышит фразу — и создаёт компанию «Конторка».</li>
+                <li>Сначала он хочет помогать людям.</li>
+                <li>Но власть затягивает. Конторка обрастает адептами и начинает подминать город: ларьки, магазины, мотели, полицию, мэрию…</li>
+            </ol>
+            <p>Путь с нуля. Захват города. Вертикаль власти — снизу вверх.</p>
+
+            <div class="note">
+                <p><strong>Бар «Старый храм»</strong> — бывшая церковь, которую священник переделал в бар. Стоит в самом центре города, на площади с фонтаном.</p>
+                <p>Здесь родилась идея Конторки — и это единственное место в городе, которое она никогда не подомнёт.</p>
+            </div>
+        </section>
+
+        <!-- ДНЕВНИК -->
+        <section id="page-devlog" data-id="devlog" class="page">
+            <h2>ДНЕВНИК РАЗРАБОТКИ</h2>
+            <p class="center">Все кадры — из движка, ранняя версия. Серые коробки — временные заглушки зданий.</p>
+
+            <div class="log-entry">
+                <div class="log-date">ОКТЯБРЬ 2026</div>
+                <h3>Город обрёл центр</h3>
+                <ul>
+                    <li>Карта города 3 × 3 км: рельеф, море, горы, озеро, леса, промзона, кладбище, жд и военная часть.</li>
+                    <li>Дороги, перекрёстки и железнодорожные переезды; тротуары в городской части.</li>
+                    <li>Бар «Старый храм» перенесён в Unity — с интерьером, светом и дверями, которые открываются.</li>
+                    <li>Главная площадь с советским фонтаном, аллеей, пустым постаментом и фонарями — часть из них мигает, часть давно умерла.</li>
+                    <li>Вокруг площади — кольцевая улица и первые кварталы: горсовет, гостиница, дом культуры, кинотеатр, универмаг, почта и хрущёвки.</li>
+                </ul>
+                <div class="gallery">
+                    <figure><img src="img/bar_interior.jpg" alt="Интерьер бара «Старый храм»" loading="lazy"><figcaption>Интерьер бара «Старый храм»</figcaption></figure>
+                    <figure><img src="img/bar_entrance.jpg" alt="Вход в бар" loading="lazy"><figcaption>Вход в бар</figcaption></figure>
+                    <figure><img src="img/main_square.jpg" alt="Главная площадь города" loading="lazy"><figcaption>Главная площадь (здания — заглушки)</figcaption></figure>
+                </div>
+            </div>
+
+            <div class="log-entry">
+                <div class="log-date">ДАЛЬШЕ</div>
+                <ul>
+                    <li>Улицы внутри кварталов, мосты и плотина у озера.</li>
+                    <li>Замена заглушек настоящими зданиями.</li>
+                    <li>Атмосфера: туман, дождь, ночной город.</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- О НАС -->
+        <section id="page-about" data-id="about" class="page">
+            <h2>О НАС</h2>
+            <p class="center"><strong>ZERO BLOCK</strong> — маленькая независимая студия.</p>
+            <p class="center">Мы начинаем с нуля — как и наш герой. Без бюджета студии-гиганта, зато со своей историей, своим городом и упрямством довести дело до конца.</p>
+            <p class="center">Делаем игру на Unity, модели — в Blender. Лор, персонажей и квесты пишем сами.</p>
+            <p class="center">Ищем людей, которым близка атмосфера постсоветских окраин начала 2000-х — серые дворы, туман и истории, которые не принято рассказывать.</p>
+        </section>
+
+        <!-- ВАКАНСИИ -->
+        <section id="page-jobs" data-id="jobs" class="page">
+            <h2>ВАКАНСИИ</h2>
+            <p class="center">Если хочешь делать «Конторку» с нами — напиши в Telegram и расскажи, что умеешь. Портфолио приветствуется.</p>
+            <div class="jobs">
+                <div class="job"><h3>Лор-директор <span class="tag">в приоритете</span></h3><p>Мир, история города, персонажи и фракции. Держит канон.</p></div>
+                <div class="job"><h3>Сценарист</h3><p>Квесты, диалоги, сцены. Чёрный юмор приветствуется.</p></div>
+                <div class="job"><h3>Художник по окружению</h3><p>Дворы, улицы, интерьеры постсоветского ПГТ.</p></div>
+                <div class="job"><h3>3D-моделлер</h3><p>Здания, пропсы, транспорт — с прицелом на игровую оптимизацию.</p></div>
+                <div class="job"><h3>Звукорежиссёр</h3><p>Эмбиент, звуки города, музыка.</p></div>
+                <div class="job"><h3>Тестировщик игры</h3><p>Играть, ломать и честно рассказывать, что не так.</p></div>
+                <div class="job"><h3>Тестировщик ПО</h3><p>Сборки, баги, отчёты.</p></div>
+            </div>
+            <p class="center"><a class="btn" href="https://t.me/Sabertone" target="_blank" rel="noopener">ОТКЛИКНУТЬСЯ В TELEGRAM</a></p>
+        </section>
+
+        <!-- КОНТАКТЫ -->
+        <section id="page-contacts" data-id="contacts" class="page">
+            <h2>КОНТАКТЫ</h2>
+            <p class="center">Связь через Telegram.</p>
+            <p class="center"><a class="btn" href="https://t.me/Sabertone" target="_blank" rel="noopener">НАПИСАТЬ В TELEGRAM</a></p>
+        </section>
+    </main>
+
+    <div class="lightbox" id="lightbox"><img alt=""></div>
+
+    <footer>
+        ZERO BLOCK © 2026<br>Мы начинаем с нуля.
+    </footer>
+
+    <script>
+        const pages = document.querySelectorAll('.page');
+        const navLinks = document.querySelectorAll('nav a');
+
+        function show(id) {
+            if (!document.getElementById('page-' + id)) id = 'home';
+            pages.forEach(p => p.classList.toggle('active', p.dataset.id === id));
+            navLinks.forEach(a => a.classList.toggle('active', a.dataset.page === id));
+            window.scrollTo(0, 0);
+        }
+
+        document.querySelectorAll('[data-page]').forEach(link => {
+            link.addEventListener('click', e => {
+                e.preventDefault();
+                const id = link.dataset.page;
+                history.pushState(null, '', '#' + id);
+                show(id);
+            });
+        });
+
+        window.addEventListener('popstate', () => show(location.hash.slice(1) || 'home'));
+        show(location.hash.slice(1) || 'home');
+
+        // увеличение скриншотов
+        const lb = document.getElementById('lightbox');
+        document.querySelectorAll('.gallery img, .hero-shot img').forEach(img => {
+            img.addEventListener('click', () => { lb.querySelector('img').src = img.src; lb.classList.add('open'); });
+        });
+        lb.addEventListener('click', () => lb.classList.remove('open'));
+        document.addEventListener('keydown', e => { if (e.key === 'Escape') lb.classList.remove('open'); });
+    </script>
+</body>
+</html>
